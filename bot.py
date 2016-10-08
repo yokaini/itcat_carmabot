@@ -55,7 +55,7 @@ features_text = """Фичи за {e}:
 Передать всем привет - 1 - /feature 2
 Получить подарок на праздник - (-10) - /feature 3
 Получить старт кит - 0 - /feature 4
-Испытать удачу - 0||5 - /feature 777
+Испытать удачу - 0||5 - /feature 7
 """.format(e=coinEmoji)
 
 defaultUserCarma = 0
@@ -641,8 +641,24 @@ def feat(bot, update, args):
 				m=txt))
 			bot.sendMessage(chat_id, text="Сообщение отправлено")
 			sendnotif(bot, from_id, 0, 5, newchat, bankcapt="ft_1")
+			
 		elif arg == 2:
-			None
+			if not inprivate(chat_id, from_id):
+				#bot.sendMessage(chat_id, text="Здесь это делать бессмысленно", 
+				#	reply_to_message_id=update.message.message_id)
+				return
+			newchat = targets.get(from_id, 0)
+			if newchat == 0:
+				bot.sendMessage(chat_id, text="""Чат по умолчанию не установлен.
+Попроси кого-нибудь из чата выполнить команду "/start getlink" и переслать тебе.""")
+				return
+			if not payment(newchat, from_id, 0, 1, True):
+				bot.sendMessage(chat_id, text="Недостаточно {e}!".format(e=coinEmoji),
+					reply_to_message_id=update.message.message_id)
+				return
+			bot.sendMessage(newchat, text="{u} передаёт всем привет!".format(u=getuname(update.message.from_user)))
+			bot.sendMessage(chat_id, text="Сообщение отправлено")
+			sendnotif(bot, from_id, 0, 1, newchat, bankcapt="ft_2")
 		elif arg == 3:
 			today = datetime.datetime.now()
 			nohd = "Сегодня нет праздника!"
@@ -660,7 +676,7 @@ def feat(bot, update, args):
 			bot.sendMessage(chat_id, text=capt, reply_to_message_id=update.message.message_id)
 		elif arg == 4:
 			None
-		elif arg == 777:
+		elif arg == 7:
 			if inprivate(chat_id, from_id):
 				cid = targets.get(chat_id, 0)
 				if cid == 0:
@@ -679,7 +695,7 @@ def feat(bot, update, args):
 					reply_to_message_id=update.message.message_id)
 				return
 			if p != 0: 
-				sendnotif(bot, from_id, 0, p, cid, bankcapt="ft_777_payment")
+				sendnotif(bot, from_id, 0, p, cid, bankcapt="ft_7_payment")
 			
 			a = randomstuff()
 			if a < 0:
@@ -687,13 +703,13 @@ def feat(bot, update, args):
 				bot.sendMessage(chat_id, text="Видимо, тебе не везёт. У тебя было отнято {} {e}".format(a,
 					e=coinEmoji), reply_to_message_id=update.message.message_id)
 				payment(cid, from_id, 0, a)
-				sendnotif(bot, from_id, 0, a, cid, bankcapt="ft_777")
+				sendnotif(bot, from_id, 0, a, cid, bankcapt="ft_7")
 			else:
 				bot.sendMessage(chat_id,
 					text="Поздравляю, удача на твоей стороне! Тебе было добавлено {} {e}".format(a, e=coinEmoji),
 					reply_to_message_id=update.message.message_id)
 				payment(cid, 0, from_id, a)
-				sendnotif(bot, 0, from_id, a, cid, bankcapt="ft_777")
+				sendnotif(bot, 0, from_id, a, cid, bankcapt="ft_7")
 			
 		else:
 			False
