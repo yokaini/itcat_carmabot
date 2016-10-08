@@ -42,7 +42,7 @@ _____
 hid_text = """Команды, не относящиеся непосредственно к боту:
 /uid — узнать UID и GID
 /whois — узнать, кто владелец определённого ID
-%%Место для вашей фичи, всего за 5 котомонет%%, обращаться к @evgfilim1
+Коты ван лав!
 """
 
 about_text = """Я бот, который считает {e} в чате :)
@@ -68,7 +68,7 @@ ftHolylist = {(30, 12): "С днём рождения IT-Koта!", (31, 12): "С
 	(8, 3): "С Восьмым марта!", (4, 4): "? ???? ??????????!", (1, 5): "С днём Весны и Труда!", 
 	(9, 5): "С днём Победы!", (12, 6): "С днём России!", (1, 9): "С днём знаний!!1)0)))",
 	(13, 9): "while True: print('С праздником, программисты')", (5, 10): "С днём учителя!",
-	(4, 11): "С днём народного единства!", (7, 10): "...тестовый праздник..."}
+	(4, 11): "С днём народного единства!", (8, 10): "...тестовый праздник..."}
 
 ftStartkit = {}
 ftTestluck = {}
@@ -683,13 +683,14 @@ def feat(bot, update, args):
 			
 			a = randomstuff()
 			if a < 0:
-				bot.sendMessage(chat_id, text="Видимо, сегодня тебе не везёт. У тебя было отнято {} {e}".format(-a,
+				a = abs(a)
+				bot.sendMessage(chat_id, text="Видимо, тебе не везёт. У тебя было отнято {} {e}".format(a,
 					e=coinEmoji), reply_to_message_id=update.message.message_id)
 				payment(cid, from_id, 0, a)
 				sendnotif(bot, from_id, 0, a, cid, bankcapt="ft_777")
 			else:
 				bot.sendMessage(chat_id,
-					text="Поздравляю, сегодня удача на твоей стороне! Тебе было добавлено {} {e}".format(a, e=coinEmoji),
+					text="Поздравляю, удача на твоей стороне! Тебе было добавлено {} {e}".format(a, e=coinEmoji),
 					reply_to_message_id=update.message.message_id)
 				payment(cid, 0, from_id, a)
 				sendnotif(bot, 0, from_id, a, cid, bankcapt="ft_777")
@@ -748,6 +749,11 @@ def whois(bot, update, args):
 	bot.sendMessage(update.message.chat_id, 
 		text="Whois {}: Username: {}, FirstName: {}, LastName: {}, ChatTitle: {}".format(who.id,
 		who.username, who.first_name, who.last_name, who.title), reply_to_message_id=update.message.message_id)
+		
+def onelove(bot, update):
+	m = update.message
+	payment(m.chat_id, 0, m.from_user.id, 1)
+	sendnotif(bot, 0, m.from_user.id, 1, m.chat_id, bankcapt="Cats4ever!")
 
 updater = Updater(botset.TOKEN)
 del botset.TOKEN
@@ -807,7 +813,7 @@ dp.add_handler(CommandHandler('unsub', unsubscr))
 ##########
 dp.add_handler(CommandHandler('admin', adminpanel, pass_args=True))
 ##########
-# There is empty :(
+dp.add_handler(RegexHandler('^Коты ван лав!$', onelove))
 ##########
 dp.add_handler(CallbackQueryHandler(button))
 dp.add_handler(MessageHandler([Filters.status_update], statusupdate))
