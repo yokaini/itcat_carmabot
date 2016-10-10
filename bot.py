@@ -55,13 +55,14 @@ features_text = """Фичи за {e}:
 Передать всем привет - 1 - /feature 2
 Получить подарок на праздник - (-10) - /feature 3
 Получить старт кит - 0 - /feature 4
-Испытать удачу - 0||5 - /feature 7
+Испытать удачу (by @evgfilim1) - 0||5 - /feature 7
 """.format(e=coinEmoji)
 
 defaultUserCarma = 0
 addViaThanks = 1
 transferLimit = 1024
 bonusSize = 10
+ftStartkitsize = 30
 
 ftHolylist = {(30, 12): "С днём рождения IT-Koта!", (31, 12): "С наступающим Новым годом!",
 	(1, 1): "С Новым годом!!!", (23, 2): "С днём защитника Отечества!", (1, 3): "С днём кошек!",
@@ -325,6 +326,11 @@ def Help(bot, update):
 
 def about(bot, update):
 	bot.sendMessage(update.message.chat_id, text=about_text)
+	
+def ping(bot, update):
+	bot.sendMessage(update.message.chat_id,
+		text="@{} ping statistics:\n4 packets transmitted, 4 received, 0% packet loss".format(botuname), 
+		reply_to_message_id=update.message.message_id)
 
 def hid(bot, update):
 	try:
@@ -611,7 +617,11 @@ def feat(bot, update, args):
 	chat_id = update.message.chat_id
 	from_id = update.message.from_user.id
 	if len(args) == 0:
-		bot.sendMessage(chat_id, text=features_text, reply_to_message_id=update.message.message_id)
+		try:
+			bot.sendMessage(from_id, text=features_text, reply_to_message_id=update.message.message_id)
+		except:
+			bot.sendMessage(chat_id, text="Невозможно отправить сообщение. Напиши в ЛС мне",
+				reply_to_message_id=update.message.message_id)
 	else:
 		try:
 			arg = int(args[0])
@@ -659,6 +669,7 @@ def feat(bot, update, args):
 			bot.sendMessage(newchat, text="{u} передаёт всем привет!".format(u=getuname(update.message.from_user)))
 			bot.sendMessage(chat_id, text="Сообщение отправлено")
 			sendnotif(bot, from_id, 0, 1, newchat, bankcapt="ft_2")
+
 		elif arg == 3:
 			today = datetime.datetime.now()
 			nohd = "Сегодня нет праздника!"
@@ -672,10 +683,26 @@ def feat(bot, update, args):
 				ftHolidaygot[chat_id].append(from_id)
 				payment(chat_id, 0, from_id, amount)
 				sendnotif(bot, 0, from_id, amount, chat_id, bankcapt="holiday")
-			
 			bot.sendMessage(chat_id, text=capt, reply_to_message_id=update.message.message_id)
+
 		elif arg == 4:
-			None
+			if inprivate(chat_id, from_id):
+				cid = targets.get(chat_id, 0)
+				if cid == 0:
+					bot.sendMessage(from_id, text="Вы не установили связь с чатом. /start для подробностей")
+					return
+			else:
+				cid = chat_id
+			
+			if from_id in ftStartkit[cid]:
+				#bot.sendMessage(chat_id, text="Ты уже получал стартовый приз!", 
+				#	reply_to_message_id=update.message.message_id)
+				return
+			
+			ftStartkit[cid].append(from_id)
+			payment(chat_id, 0, from_id, ftStartkitsize)
+			sendnotif(bot, 0, from_id, ftStartkitsize, chat_id, bankcapt="ft_4")
+			
 		elif arg == 7:
 			if inprivate(chat_id, from_id):
 				cid = targets.get(chat_id, 0)
@@ -712,7 +739,11 @@ def feat(bot, update, args):
 				sendnotif(bot, 0, from_id, a, cid, bankcapt="ft_7")
 			
 		else:
-			False
+			try:
+				bot.sendMessage(from_id, text=features_text, reply_to_message_id=update.message.message_id)
+			except:
+				bot.sendMessage(chat_id, text="Невозможно отправить сообщение. Напиши в ЛС мне",
+					reply_to_message_id=update.message.message_id)
 
 def statusupdate(bot, update):
 	if not bool(update.message.new_chat_member):
@@ -796,6 +827,7 @@ dp.add_handler(CommandHandler('start', start, pass_args=True))
 dp.add_handler(CommandHandler('help', Help))
 dp.add_handler(CommandHandler('about', about))
 dp.add_handler(CommandHandler('hid', hid))
+dp.add_handler(CommandHandler('ping', ping))
 ##########
 dp.add_handler(CommandHandler('uid', uid))
 ##########
