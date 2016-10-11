@@ -60,7 +60,7 @@ features_text = """Фичи за {e}:
 Получить подарок на праздник - (-10) - /feature 3
 Получить старт кит - 0 - /feature 4
 Испытать удачу (by @evgfilim1) - 0||5 - /feature 7
-Испытать удачу (by @metroyanno) - 0||5 - /feature 777
+Испытать удачу (by @metroyanno) - 5 - /feature 777
 """.format(e=coinEmoji)
 
 defaultUserCarma = 0
@@ -117,7 +117,7 @@ _____
 		tm += "{} ".format(chatid)
 		ftHolidaygot[chatid] = []
 		ftTestluck[chatid] = []
-		ftStartkit[chatid] = [] ###TODO: Save'em all###
+		ftStartkit[chatid] = []
 		
 	for cuid in [61043901, 268675313]:
 		payment(update.message.chat_id, 0, cuid, 25)
@@ -161,7 +161,7 @@ def sendnotif(bot, from_id, to_id, amount, chat_id, *, txfrom=0, bankcapt=""):
 		capt = ''
 		if from_id != 0:
 			capt = 'пользователем {}'.format(unames.get(from_id, 'Unknown user {}'.format(from_id)))
-		bot.sendMessage(from_id, text="Вам было добавлено {0} {e} {1} в чате {2}".format(amount, capt, chat_title,
+		bot.sendMessage(to_id, text="Вам было добавлено {0} {e} {1} в чате {2}".format(amount, capt, chat_title,
 			e=coinEmoji))
 		
 	if botset.useLoggingChannel:
@@ -341,6 +341,9 @@ def start(bot, update, args):
 	carma[chat_id] = {}
 	msgcount[chat_id] = {}
 	chatadmins[chat_id] = []
+	ftHolidaygot[chat_id] = []
+	ftTestluck[chat_id] = []
+	ftStartkit[chat_id] = []
 	admins = bot.getChatAdministrators(chat_id)
 	for admin in admins:
 		unames.update({admin.user.id: getuname(admin.user)})
@@ -732,7 +735,7 @@ def thnx(bot, update):
 	elif u.id == botid:
 		u.id = botset.creatorid
 	payment(chat_id, 0, u.id, 1)
-	sendnotif(bot, 0, u.id, 1, txfrom=update.message.from_user.id)
+	sendnotif(bot, 0, u.id, 1, chat_id, txfrom=update.message.from_user.id)
 #	bot.sendMessage(chat_id, text="Добавлено +1 {e} {0}".format(getuname(u), e=coinEmoji),
 #		reply_to_message_id=update.message.message_id)
 
@@ -741,10 +744,11 @@ def feat(bot, update, args):
 	from_id = update.message.from_user.id
 	if len(args) == 0:
 		try:
-			bot.sendMessage(from_id, text=features_text, reply_to_message_id=update.message.message_id)
+			bot.sendMessage(from_id, text=features_text)
 		except:
 			bot.sendMessage(chat_id, text="Невозможно отправить сообщение. Напиши в ЛС мне",
 				reply_to_message_id=update.message.message_id)
+
 	else:
 		try:
 			arg = int(args[0])
@@ -794,18 +798,26 @@ def feat(bot, update, args):
 			sendnotif(bot, from_id, 0, 1, newchat, bankcapt="ft_2")
 
 		elif arg == 3:
+			if inprivate(chat_id, from_id):
+				cid = targets.get(chat_id, 0)
+				if cid == 0:
+					bot.sendMessage(from_id, text="Вы не установили связь с чатом. /start для подробностей")
+					return
+			else:
+				cid = chat_id
+
 			today = datetime.datetime.now()
 			nohd = "Сегодня нет праздника!"
 			capt = ftHolylist.get((today.day, today.month), nohd)
 			amount = 10
 			if capt != nohd:
-				if from_id in ftHolidaygot[chat_id]:
+				if from_id in ftHolidaygot[cid]:
 					bot.sendMessage(chat_id, text="Ты уже брал подарок!", 
 						reply_to_message_id=update.message.message_id)
 					return
-				ftHolidaygot[chat_id].append(from_id)
-				payment(chat_id, 0, from_id, amount)
-				sendnotif(bot, 0, from_id, amount, chat_id, bankcapt="holiday")
+				ftHolidaygot[cid].append(from_id)
+				payment(cid, 0, from_id, amount)
+				sendnotif(bot, 0, from_id, amount, cid, bankcapt="holiday")
 			bot.sendMessage(chat_id, text=capt, reply_to_message_id=update.message.message_id)
 
 		elif arg == 4:
@@ -823,8 +835,8 @@ def feat(bot, update, args):
 				return
 			
 			ftStartkit[cid].append(from_id)
-			payment(chat_id, 0, from_id, ftStartkitsize)
-			sendnotif(bot, 0, from_id, ftStartkitsize, chat_id, bankcapt="ft_4")
+			payment(cid, 0, from_id, ftStartkitsize)
+			sendnotif(bot, 0, from_id, ftStartkitsize, cid, bankcapt="ft_4")
 			
 		elif arg == 7:
 			if inprivate(chat_id, from_id):
@@ -885,7 +897,7 @@ def feat(bot, update, args):
 			bot.sendMessage(chat_id, text="{0} выбирает билет:".format(getuname(update.message.from_user)), reply_markup=mrkup)
 		else:
 			try:
-				bot.sendMessage(from_id, text=features_text, reply_to_message_id=update.message.message_id)
+				bot.sendMessage(from_id, text=features_text)
 			except:
 				bot.sendMessage(chat_id, text="Невозможно отправить сообщение. Напиши в ЛС мне",
 					reply_to_message_id=update.message.message_id)
