@@ -268,7 +268,7 @@ def loaddata():
 			ftHolidaygot = pickle.load(f)
 		with open(ddr + 'ftluck.pkl', 'rb') as f:
 			ftTestluck = pickle.load(f)
-		with open(ddr + 'ftkit.pkl', 'rb') as f:
+		with open(ddr + 'kit.pkl', 'rb') as f:
 			ftStartkit = pickle.load(f)
 		logging.info("data loaded.")
 
@@ -1062,7 +1062,7 @@ dp.add_handler(MessageHandler([], onStuff))
 ##########
 dp.add_error_handler(error)
 
-updater.start_polling()
+updater.start_polling(timeout=10, clean=True)
 updater.idle()
 
 jobhourly(None, None)
