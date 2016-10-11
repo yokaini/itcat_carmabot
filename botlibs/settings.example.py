@@ -21,8 +21,12 @@ useLoggingChannel = False
 # Logging channel name
 loggingChannel = '@channelname'
 
-# Coin emoji to use in bot
+# Emojis, that are used in the bot:
+# Coin emoji
 coin = '🐱'
 
-# Message emoji to use in bot
+# Message emoji
 msg = '✉'
+
+# Ticket emoji
+ticket = '🎟'
